@@ -2,6 +2,7 @@ package com.example.u2t2_hilos;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.View;
@@ -18,12 +19,41 @@ public class MainActivity  extends AppCompatActivity {
         entrada = (EditText) findViewById(R.id.entrada);
         salida = (TextView) findViewById(R.id.salida);
     }
+    class MiThread extends Thread {
+        private int n, res;
+        public MiThread(int n) {
+            this.n = n;
+        }
+        @Override public void run() {
+            res = factorial(n);
+            runOnUiThread(new Runnable() {
+                @Override public void run() {
+                    salida.append(res + "\n");
+                }
+            });
+        }
+    }
+    class MiTarea extends AsyncTask<Integer, Void, Integer> {
+        @Override
+        protected Integer doInBackground(Integer... n) {
+            return factorial(n[0]);
+        }
+        @Override
+        protected void onPostExecute(Integer res) {
+            salida.append(res + "\n");
+        }
+    }
     public void calcularOperacion(View view) {
         int n = Integer.parseInt(entrada.getText().toString());
         salida.append(n + "! = ");
-        int res = factorial(n);
-        salida.append(res + "\n");
+        //no recomenddo
+        /*MiThread thread = new MiThread(n);
+        thread.start();*/
+        //recomendado
+        MiTarea tarea = new MiTarea();
+        tarea.execute(n);
     }
+
     public int factorial(int n) {
         int res = 1;
         for (int i = 1; i <= n; i++) {

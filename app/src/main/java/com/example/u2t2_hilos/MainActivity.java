@@ -2,6 +2,7 @@ package com.example.u2t2_hilos;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -33,13 +34,32 @@ public class MainActivity  extends AppCompatActivity {
             });
         }
     }
-    class MiTarea extends AsyncTask<Integer, Void, Integer> {
-        @Override
-        protected Integer doInBackground(Integer... n) {
-            return factorial(n[0]);
+    class MiTarea extends AsyncTask<Integer, Integer, Integer> {
+        private ProgressDialog progreso;
+        @Override protected void onPreExecute() {
+            progreso = new ProgressDialog(MainActivity.this);
+            progreso.setProgressStyle(ProgressDialog.
+                    STYLE_HORIZONTAL);
+            progreso.setMessage("Calculando...");
+            progreso.setCancelable(false);
+            progreso.setMax(100);
+            progreso.setProgress(0);
+            progreso.show();
         }
-        @Override
-        protected void onPostExecute(Integer res) {
+        @Override protected Integer doInBackground(Integer... n) {
+            int res = 1;
+            for (int i = 1; i <= n[0]; i++) {
+                res *= i;
+                SystemClock.sleep(1000);
+                publishProgress(i*100 / n[0]);
+            }
+            return res;
+        }
+        @Override protected void onProgressUpdate(Integer... porc) {
+            progreso.setProgress(porc[0]);
+        }
+        @Override protected void onPostExecute(Integer res) {
+            progreso.dismiss();
             salida.append(res + "\n");
         }
     }

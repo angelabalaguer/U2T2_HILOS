@@ -3,6 +3,7 @@ package com.example.u2t2_hilos;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -41,14 +42,21 @@ public class MainActivity  extends AppCompatActivity {
             progreso.setProgressStyle(ProgressDialog.
                     STYLE_HORIZONTAL);
             progreso.setMessage("Calculando...");
-            progreso.setCancelable(false);
+          //  progreso.setCancelable(false);
+            progreso.setCancelable(true);
+            progreso.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    MiTarea.this.cancel(true);
+                }
+            });
             progreso.setMax(100);
             progreso.setProgress(0);
             progreso.show();
         }
         @Override protected Integer doInBackground(Integer... n) {
             int res = 1;
-            for (int i = 1; i <= n[0]; i++) {
+            for (int i = 1; i <= n[0] && !isCancelled(); i++) {
                 res *= i;
                 SystemClock.sleep(1000);
                 publishProgress(i*100 / n[0]);
@@ -61,6 +69,9 @@ public class MainActivity  extends AppCompatActivity {
         @Override protected void onPostExecute(Integer res) {
             progreso.dismiss();
             salida.append(res + "\n");
+        }
+        @Override protected void onCancelled() {
+            salida.append("cancelado\n");
         }
     }
     public void calcularOperacion(View view) {
